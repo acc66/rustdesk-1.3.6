@@ -1,0 +1,53 @@
+name: Build RustDesk 1.3.6 Windows Custom
+
+on:
+  push:
+    tags:
+      - "custom-build-*"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout v1.3.6
+        uses: actions/checkout@v4
+        with:
+          ref: 1.3.6
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install build tools
+        run: |
+          choco install -y ninja llvm 7zip
+
+      - name: Export custom config
+        shell: bash
+        run: |
+          mkdir -p dist
+          cat > dist/RustDesk.toml <<CFG
+[server]
+id = "apple.help600.com:21116"
+relay = "apple.help600.com:21117"
+api = ""
+
+[key]
+pubkey = "9ZlTXw4G5hBuHLrjOOpKCe9Nv8h627GGr3B1CJCyt80="
+CFG
+
+      - name: Build (release)
+        run: cargo build --release
+
+      - name: Package portable version
+        shell: bash
+        run: |
+          EXE_PATH=$(ls target/release/*.exe | head -n1)
+          cp "$EXE_PATH" dist/
+          cd dist
+          7z a rustdesk-1.3.6-custom.zip ./*
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: rustdesk-1.3.6-windows-custom
+          path: dist/rustdesk-1.3.6-custom.zip
