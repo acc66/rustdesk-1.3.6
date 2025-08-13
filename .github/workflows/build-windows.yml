@@ -25,7 +25,7 @@ jobs:
         shell: bash
         run: |
           mkdir -p dist
-          cat > dist/RustDesk.toml <<CFG
+          cat > dist/RustDesk.toml <<'CONFIG_EOF'
 [server]
 id = "apple.help600.com:21116"
 relay = "apple.help600.com:21117"
@@ -33,7 +33,7 @@ api = ""
 
 [key]
 pubkey = "9ZlTXw4G5hBuHLrjOOpKCe9Nv8h627GGr3B1CJCyt80="
-CFG
+CONFIG_EOF
 
       - name: Build (release)
         run: cargo build --release
